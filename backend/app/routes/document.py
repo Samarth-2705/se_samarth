@@ -19,7 +19,7 @@ bp = Blueprint('document', __name__)
 def upload_document():
     """Upload a document"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -120,7 +120,7 @@ def upload_document():
 def list_documents():
     """List user's documents"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -146,7 +146,7 @@ def list_documents():
 def download_document(document_id):
     """Download a document"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         document = Document.query.get(document_id)
@@ -179,7 +179,7 @@ def download_document(document_id):
 def verify_document(document_id):
     """Verify or reject a document (admin only)"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.ADMIN:
@@ -293,7 +293,7 @@ def verify_document(document_id):
 def get_pending_documents():
     """Get pending documents for verification (admin only)"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.ADMIN:

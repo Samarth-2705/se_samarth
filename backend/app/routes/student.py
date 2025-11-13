@@ -15,7 +15,7 @@ bp = Blueprint('student', __name__)
 def get_profile():
     """Get student profile"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -35,7 +35,7 @@ def get_profile():
 def update_profile():
     """Update student profile"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -94,7 +94,7 @@ def update_profile():
 def complete_registration():
     """Mark registration as complete"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -131,7 +131,7 @@ def complete_registration():
 def get_dashboard():
     """Get student dashboard data"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
