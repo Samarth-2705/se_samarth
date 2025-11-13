@@ -44,9 +44,37 @@ class PaymentService:
         """
         try:
             client = PaymentService.get_client()
-            if not client:
-                return None
 
+            # Test mode if no Razorpay client
+            if not client:
+                current_app.logger.info("Running in test payment mode")
+                # Create test order
+                test_order_id = f"test_order_{int(datetime.utcnow().timestamp())}"
+
+                # Create payment record
+                payment = Payment(
+                    student_id=student_id,
+                    payment_type=payment_type,
+                    amount=amount,
+                    currency=currency,
+                    status=PaymentStatus.INITIATED,
+                    gateway_name='test_mode',
+                    gateway_order_id=test_order_id,
+                    order_id=test_order_id
+                )
+                db.session.add(payment)
+                db.session.commit()
+
+                return {
+                    'id': payment.id,
+                    'payment_id': payment.id,
+                    'order_id': test_order_id,
+                    'amount': amount,
+                    'currency': currency,
+                    'test_mode': True
+                }
+
+            # Production mode with Razorpay
             # Convert amount to paise (Razorpay uses paise)
             amount_paise = int(float(amount) * 100)
 
@@ -65,12 +93,14 @@ class PaymentService:
                 currency=currency,
                 status=PaymentStatus.INITIATED,
                 gateway_name='razorpay',
-                gateway_order_id=order['id']
+                gateway_order_id=order['id'],
+                order_id=order['id']
             )
             db.session.add(payment)
             db.session.commit()
 
             return {
+                'id': payment.id,
                 'payment_id': payment.id,
                 'order_id': order['id'],
                 'amount': amount,
@@ -101,9 +131,59 @@ class PaymentService:
                 return False
 
             client = PaymentService.get_client()
-            if not client:
-                return False
 
+            # Test mode if no Razorpay client
+            if not client or payment.gateway_name == 'test_mode':
+                current_app.logger.info("Verifying test payment")
+
+                # Update payment record for test mode
+                payment.gateway_payment_id = razorpay_payment_id
+                payment.gateway_signature = razorpay_signature
+                payment.status = PaymentStatus.SUCCESS
+                payment.payment_method = 'test'
+                payment.transaction_id = razorpay_payment_id
+                payment.completed_at = datetime.utcnow()
+
+                # Generate receipt number
+                payment.receipt_number = f"REC{payment.id:08d}"
+                payment.receipt_generated = True
+
+                db.session.commit()
+
+                # Update student's payment status
+                student = payment.student
+                if student:
+                    if payment.payment_type == PaymentType.APPLICATION_FEE:
+                        student.payment_complete = True
+                        db.session.commit()
+
+                    # Send confirmation notifications (will only work if email/SMS configured)
+                    if student.user:
+                        try:
+                            EmailService.send_payment_confirmation(
+                                student.user.email,
+                                student.full_name,
+                                payment.amount,
+                                payment.receipt_number,
+                                student.user_id
+                            )
+                        except:
+                            pass  # Ignore email failures in test mode
+
+                        try:
+                            SMSService.send_payment_confirmation_sms(
+                                student.user.mobile,
+                                student.full_name,
+                                payment.amount,
+                                payment.receipt_number,
+                                student.user_id
+                            )
+                        except:
+                            pass  # Ignore SMS failures in test mode
+
+                return True
+
+            # Production mode with Razorpay
             # Verify signature
             params_dict = {
                 'razorpay_order_id': payment.gateway_order_id,
