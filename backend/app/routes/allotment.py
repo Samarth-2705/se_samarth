@@ -14,7 +14,7 @@ bp = Blueprint('allotment', __name__)
 def get_my_allotment():
     """Get student's allotment details"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -47,7 +47,7 @@ def get_my_allotment():
 def accept_allotment(allotment_id):
     """Accept an allotted seat"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -94,7 +94,7 @@ def accept_allotment(allotment_id):
 def reject_allotment(allotment_id):
     """Reject an allotted seat"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -170,7 +170,7 @@ def get_round_details(round_id):
 def get_allotment_statistics():
     """Get allotment statistics (admin only)"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.ADMIN:

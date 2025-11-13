@@ -14,7 +14,7 @@ bp = Blueprint('payment', __name__)
 def create_payment_order():
     """Create a payment order"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -58,7 +58,7 @@ def create_payment_order():
 def verify_payment():
     """Verify payment after successful transaction"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -92,7 +92,7 @@ def verify_payment():
 def get_payment_history():
     """Get payment history"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -118,7 +118,7 @@ def get_payment_history():
 def request_refund(payment_id):
     """Request a refund"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -152,7 +152,7 @@ def request_refund(payment_id):
 def process_refund(payment_id):
     """Process a refund (admin only)"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.ADMIN:

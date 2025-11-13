@@ -16,7 +16,7 @@ bp = Blueprint('admin', __name__)
 
 def require_admin():
     """Decorator to require admin role"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     if not user or user.role != UserRole.ADMIN:
         return None

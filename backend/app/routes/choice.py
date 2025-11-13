@@ -15,7 +15,7 @@ bp = Blueprint('choice', __name__)
 def get_eligible_colleges():
     """Get list of eligible colleges based on student rank"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -62,7 +62,7 @@ def get_eligible_colleges():
 def add_choice():
     """Add a college/course to choice list"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -128,7 +128,7 @@ def add_choice():
 def list_choices():
     """Get student's choices"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -157,7 +157,7 @@ def list_choices():
 def remove_choice(choice_id):
     """Remove a choice"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -201,7 +201,7 @@ def remove_choice(choice_id):
 def reorder_choices():
     """Reorder choices"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
@@ -240,7 +240,7 @@ def reorder_choices():
 def submit_choices():
     """Submit and lock choices"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
 
         if not user or user.role != UserRole.STUDENT:
