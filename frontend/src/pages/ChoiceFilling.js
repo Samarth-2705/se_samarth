@@ -169,7 +169,7 @@ const ChoiceFilling = () => {
                   </p>
                   <p className="college-type">
                     <span className="badge badge-info">{collegeData.college.type}</span>
-                    <span className="badge badge-secondary">{collegeData.college.affiliation}</span>
+                    <span className="badge badge-secondary">{collegeData.college.university}</span>
                   </p>
                   <div className="courses-list">
                     <strong>Available Courses:</strong>
@@ -181,7 +181,7 @@ const ChoiceFilling = () => {
                             <div className="course-info">
                               <span className="course-name">{course.name}</span>
                               <span className="course-details">
-                                {course.available_seats} seats • ₹{course.fee_per_year?.toLocaleString()}/year
+                                {course.available_seats} seats • ₹{course.tuition_fee?.toLocaleString()}/year
                               </span>
                               <span className="course-rank">
                                 Rank: {course.min_rank} - {course.max_rank}

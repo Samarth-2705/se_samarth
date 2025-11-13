@@ -46,6 +46,10 @@ class Choice(db.Model):
         if include_course and self.course:
             data['course'] = self.course.to_dict(include_college=include_college)
 
+        # Include college data directly for frontend convenience
+        if include_college and self.course and self.course.college:
+            data['college'] = self.course.college.to_dict()
+
         return data
 
     def __repr__(self):

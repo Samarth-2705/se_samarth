@@ -276,6 +276,11 @@ class SeatAllotmentService:
             )
             allotment.acceptance_date = datetime.utcnow()
 
+            # If frozen, mark admission as confirmed
+            if freeze:
+                allotment.student.admission_confirmed = True
+                current_app.logger.info(f"Student {allotment.student.id} admission confirmed")
+
             # Update round statistics
             allotment.round.accepted_count += 1
 
