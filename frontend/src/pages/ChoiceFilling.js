@@ -12,6 +12,7 @@ const ChoiceFilling = () => {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [adding, setAdding] = useState(null); // Track which course is being added
 
   useEffect(() => {
     loadChoices();
@@ -40,6 +41,36 @@ const ChoiceFilling = () => {
     }
   };
 
+  const handleAddChoice = async (courseId) => {
+    if (adding) return; // Prevent multiple simultaneous additions
+
+    setAdding(courseId);
+
+    try {
+      await choiceAPI.add({ course_id: courseId });
+      toast.success('Choice added successfully');
+      await loadChoices(); // Reload choices to get updated list
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to add choice');
+      console.error(error);
+    } finally {
+      setAdding(null);
+    }
+  };
+
+  const handleRemoveChoice = async (choiceId) => {
+    if (window.confirm('Are you sure you want to remove this choice?')) {
+      try {
+        await choiceAPI.remove(choiceId);
+        toast.success('Choice removed successfully');
+        await loadChoices(); // Reload choices to get updated list
+      } catch (error) {
+        toast.error(error.response?.data?.error || 'Failed to remove choice');
+        console.error(error);
+      }
+    }
+  };
+
   const handleSubmitChoices = async () => {
     if (choices.length === 0) {
       toast.error('Please add at least one choice before submitting');
@@ -58,6 +89,10 @@ const ChoiceFilling = () => {
     }
   };
 
+  const isChoiceAdded = (courseId) => {
+    return choices.some(choice => choice.course_id === courseId);
+  };
+
   return (
     <Layout title="Choice Filling">
       <div className="card">
@@ -65,7 +100,7 @@ const ChoiceFilling = () => {
           <h3>My Choices {submitted && <span className="badge badge-success">Submitted</span>}</h3>
           {!submitted && choices.length > 0 && (
             <button onClick={handleSubmitChoices} className="btn btn-primary">
-              Submit Choices
+              Submit Choices ({choices.length} selected)
             </button>
           )}
         </div>
@@ -93,14 +128,19 @@ const ChoiceFilling = () => {
               <tbody>
                 {choices.map((choice) => (
                   <tr key={choice.id}>
-                    <td>{choice.preference_order}</td>
+                    <td>#{choice.preference_order}</td>
                     <td>{choice.college?.name}</td>
                     <td>{choice.course?.name}</td>
                     <td>{choice.college?.city}, {choice.college?.state}</td>
                     <td>{choice.course?.available_seats}</td>
                     {!submitted && (
                       <td>
-                        <button className="btn btn-sm btn-danger">Remove</button>
+                        <button
+                          onClick={() => handleRemoveChoice(choice.id)}
+                          className="btn btn-sm btn-danger"
+                        >
+                          Remove
+                        </button>
                       </td>
                     )}
                   </tr>
@@ -115,24 +155,54 @@ const ChoiceFilling = () => {
         <div className="card">
           <h3>Eligible Colleges</h3>
           {colleges.length === 0 ? (
-            <p className="no-data">No eligible colleges found based on your rank</p>
+            <div className="no-data">
+              <p>No eligible colleges found based on your rank (1500)</p>
+              <p className="text-muted">Please contact admin if you believe this is an error</p>
+            </div>
           ) : (
             <div className="colleges-grid">
               {colleges.map((collegeData) => (
                 <div key={collegeData.college.id} className="college-card">
                   <h4>{collegeData.college.name}</h4>
                   <p className="college-location">
-                    {collegeData.college.city}, {collegeData.college.state}
+                    📍 {collegeData.college.city}, {collegeData.college.state}
+                  </p>
+                  <p className="college-type">
+                    <span className="badge badge-info">{collegeData.college.type}</span>
+                    <span className="badge badge-secondary">{collegeData.college.affiliation}</span>
                   </p>
                   <div className="courses-list">
                     <strong>Available Courses:</strong>
                     <ul>
-                      {collegeData.courses.map((course) => (
-                        <li key={course.id}>
-                          {course.name} - {course.available_seats} seats available
-                          <button className="btn btn-sm btn-primary">Add to Choices</button>
-                        </li>
-                      ))}
+                      {collegeData.courses.map((course) => {
+                        const alreadyAdded = isChoiceAdded(course.id);
+                        return (
+                          <li key={course.id}>
+                            <div className="course-info">
+                              <span className="course-name">{course.name}</span>
+                              <span className="course-details">
+                                {course.available_seats} seats • ₹{course.fee_per_year?.toLocaleString()}/year
+                              </span>
+                              <span className="course-rank">
+                                Rank: {course.min_rank} - {course.max_rank}
+                              </span>
+                            </div>
+                            {alreadyAdded ? (
+                              <button className="btn btn-sm btn-success" disabled>
+                                ✓ Added
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleAddChoice(course.id)}
+                                className="btn btn-sm btn-primary"
+                                disabled={adding === course.id}
+                              >
+                                {adding === course.id ? 'Adding...' : 'Add to Choices'}
+                              </button>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>
@@ -146,9 +216,11 @@ const ChoiceFilling = () => {
         <h3>Important Information</h3>
         <ul className="info-list">
           <li>You can add up to 100 choices in order of preference</li>
+          <li>Choices are automatically ordered based on when you add them</li>
           <li>Once submitted, choices cannot be modified</li>
           <li>Seat allotment will be based on your rank and choice preference</li>
-          <li>Higher preference choices will be considered first</li>
+          <li>Higher preference choices (lower numbers) will be considered first</li>
+          <li>Make sure to review all your choices before submitting</li>
         </ul>
       </div>
     </Layout>
