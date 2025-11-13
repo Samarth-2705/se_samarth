@@ -40,7 +40,14 @@ def sample_user(app):
         user.is_verified = True
         db.session.add(user)
         db.session.commit()
-        return user
+        user_id = user.id  # Store ID before session closes
+
+    # Create a simple object to hold the ID
+    class UserRef:
+        def __init__(self, id):
+            self.id = id
+
+    return UserRef(user_id)
 
 @pytest.fixture
 def sample_student(app, sample_user):
@@ -52,14 +59,21 @@ def sample_student(app, sample_user):
             last_name='Doe',
             date_of_birth=datetime(2000, 1, 1).date(),
             gender='Male',
-            exam_type='JEE',
+            exam_type='KCET',
             exam_rank=1500,
-            exam_roll_number='JEE2024001',
-            category='General'
+            exam_roll_number='KCET2024001',
+            category='General',
+            domicile_state='Karnataka'
         )
         db.session.add(student)
         db.session.commit()
-        return student
+        student_id = student.id
+
+    class StudentRef:
+        def __init__(self, id):
+            self.id = id
+
+    return StudentRef(student_id)
 
 @pytest.fixture
 def sample_college(app):
@@ -75,7 +89,13 @@ def sample_college(app):
         )
         db.session.add(college)
         db.session.commit()
-        return college
+        college_id = college.id
+
+    class CollegeRef:
+        def __init__(self, id):
+            self.id = id
+
+    return CollegeRef(college_id)
 
 @pytest.fixture
 def sample_course(app, sample_college):
@@ -102,7 +122,13 @@ def sample_course(app, sample_college):
         )
         db.session.add(course)
         db.session.commit()
-        return course
+        course_id = course.id
+
+    class CourseRef:
+        def __init__(self, id):
+            self.id = id
+
+    return CourseRef(course_id)
 
 
 class TestUserModel:
@@ -163,10 +189,11 @@ class TestStudentModel:
                 last_name='Smith',
                 date_of_birth=datetime(2001, 5, 15).date(),
                 gender='Female',
-                exam_type='JEE',
+                exam_type='KCET',
                 exam_rank=2000,
-                exam_roll_number='JEE2024002',
-                category='OBC'
+                exam_roll_number='KCET2024002',
+                category='OBC',
+                domicile_state='Karnataka'
             )
             db.session.add(student)
             db.session.commit()
@@ -187,17 +214,26 @@ class TestStudentModel:
         with app.app_context():
             student = Student.query.get(sample_student.id)
 
-            # Initially incomplete
-            assert student.application_status == 'incomplete'
+            # Initially incomplete (Registration Pending)
+            assert student.application_status == 'Registration Pending'
 
-            # Mark as complete
+            # Mark registration complete
             student.registration_complete = True
+            db.session.commit()
+            assert student.application_status == 'Registration Complete'
+
+            # Mark payment complete
             student.payment_complete = True
+            db.session.commit()
+            assert student.application_status == 'Payment Complete'
+
+            # Mark all complete
             student.documents_verified = True
             student.choices_submitted = True
+            student.seat_allotted = True
             db.session.commit()
 
-            assert student.application_status == 'complete'
+            assert student.application_status == 'Seat Allotted'
 
 
 class TestCollegeAndCourseModels:
@@ -229,6 +265,8 @@ class TestCollegeAndCourseModels:
                 name='Mechanical Engineering',
                 code='ME',
                 branch='Mechanical',
+                degree='B.E.',
+                duration_years=4,
                 total_seats=100,
                 available_seats=100,
                 min_rank=500,
