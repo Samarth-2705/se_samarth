@@ -1,19 +1,30 @@
 """
 Script to populate database with sample colleges and courses
 """
+import sys
 from app import create_app, db
 from app.models import College, Course
 
-def seed_colleges_and_courses():
+def seed_colleges_and_courses(force=False):
     """Add sample colleges and courses to the database"""
 
     app = create_app()
     with app.app_context():
         # Check if colleges already exist
         existing_colleges = College.query.count()
-        if existing_colleges > 0:
-            print(f"Database already has {existing_colleges} colleges. Skipping seed.")
+
+        if existing_colleges > 0 and not force:
+            print(f"Database already has {existing_colleges} colleges.")
+            print("Run with --force to clear and re-seed, or --add to add more colleges")
             return
+
+        if force:
+            print(f"Clearing {existing_colleges} existing colleges...")
+            # Delete existing courses first (foreign key constraint)
+            Course.query.delete()
+            College.query.delete()
+            db.session.commit()
+            print("Existing data cleared.")
 
         print("Seeding colleges and courses...")
 
@@ -228,10 +239,13 @@ def seed_colleges_and_courses():
             print(f"  Added {len(courses_template)} courses")
 
         db.session.commit()
-        print("\nSeeding completed successfully!")
+        print("\n" + "="*50)
+        print("Seeding completed successfully!")
         print(f"Added {len(colleges_data)} colleges with {len(courses_template)} courses each")
         print(f"Total courses: {len(colleges_data) * len(courses_template)}")
+        print("="*50)
 
 
 if __name__ == '__main__':
-    seed_colleges_and_courses()
+    force = '--force' in sys.argv or '--add' in sys.argv
+    seed_colleges_and_courses(force=force)
