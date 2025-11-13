@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/api';
+import { useAuth } from '../utils/AuthContext';
 import { toast } from 'react-toastify';
 import './styles.css';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +86,11 @@ const AdminDashboard = () => {
     loadStudents();
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (loading && !stats) {
     return (
       <div className="dashboard-container">
@@ -93,14 +102,22 @@ const AdminDashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="admin-header">
-        <h2>Admin Dashboard</h2>
-        <button
-          onClick={handleTriggerAllotment}
-          disabled={triggeringAllotment}
-          className="btn btn-primary"
-        >
-          {triggeringAllotment ? 'Processing...' : 'Trigger Seat Allotment'}
-        </button>
+        <div>
+          <h2>Admin Dashboard</h2>
+          <p className="admin-user-info">Logged in as: {user?.email}</p>
+        </div>
+        <div className="admin-actions">
+          <button
+            onClick={handleTriggerAllotment}
+            disabled={triggeringAllotment}
+            className="btn btn-primary"
+          >
+            {triggeringAllotment ? 'Processing...' : 'Trigger Seat Allotment'}
+          </button>
+          <button onClick={handleLogout} className="btn btn-secondary">
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
