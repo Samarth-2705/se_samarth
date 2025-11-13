@@ -9,6 +9,7 @@ from . import db
 class PaymentType(str, Enum):
     """Payment type enumeration"""
     APPLICATION_FEE = 'application_fee'
+    COUNSELLING_FEE = 'counselling_fee'
     ADMISSION_FEE = 'admission_fee'
     TUITION_FEE = 'tuition_fee'
     REFUND = 'refund'
