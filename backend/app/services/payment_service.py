@@ -59,8 +59,7 @@ class PaymentService:
                     currency=currency,
                     status=PaymentStatus.INITIATED,
                     gateway_name='test_mode',
-                    gateway_order_id=test_order_id,
-                    order_id=test_order_id
+                    gateway_order_id=test_order_id
                 )
                 db.session.add(payment)
                 db.session.commit()
@@ -93,8 +92,7 @@ class PaymentService:
                 currency=currency,
                 status=PaymentStatus.INITIATED,
                 gateway_name='razorpay',
-                gateway_order_id=order['id'],
-                order_id=order['id']
+                gateway_order_id=order['id']
             )
             db.session.add(payment)
             db.session.commit()
