@@ -37,7 +37,7 @@ def verified_user(app):
         user = User(
             email='student@test.com',
             mobile='9876543210',
-            password='password123',
+            password='Password123',
             role=UserRole.STUDENT
         )
         user.email_verified = True
@@ -52,10 +52,11 @@ def verified_user(app):
             last_name='Student',
             date_of_birth=datetime(2000, 1, 1).date(),
             gender='Male',
-            exam_type='JEE',
+            exam_type='KCET',
             exam_rank=1500,
-            exam_roll_number='JEE2024001',
-            category='General'
+            exam_roll_number='KCET2024001',
+            category='General',
+            domicile_state='Karnataka'
         )
         db.session.add(student)
         db.session.commit()
@@ -69,7 +70,7 @@ def admin_user(app):
         user = User(
             email='admin@test.com',
             mobile='9999999999',
-            password='admin123',
+            password='Admin123',
             role=UserRole.ADMIN
         )
         user.email_verified = True
@@ -86,7 +87,7 @@ def auth_token(client, verified_user):
     response = client.post('/api/auth/login',
         json={
             'identifier': 'student@test.com',
-            'password': 'password123'
+            'password': 'Password123'
         },
         content_type='application/json'
     )
@@ -100,7 +101,7 @@ def admin_token(client, admin_user):
     response = client.post('/api/auth/login',
         json={
             'identifier': 'admin@test.com',
-            'password': 'admin123'
+            'password': 'Admin123'
         },
         content_type='application/json'
     )
@@ -128,6 +129,8 @@ def sample_college_course(app):
             name='Computer Science',
             code='CSE',
             branch='Computer Science',
+            degree='B.E.',
+            duration_years=4,
             total_seats=100,
             available_seats=100,
             general_seats=50,
@@ -149,15 +152,16 @@ class TestAuthenticationAPI:
             json={
                 'email': 'newuser@test.com',
                 'mobile': '8888888888',
-                'password': 'newpass123',
+                'password': 'Newpass123',
                 'first_name': 'New',
                 'last_name': 'User',
                 'date_of_birth': '2000-01-01',
                 'gender': 'Male',
-                'exam_type': 'JEE',
+                'exam_type': 'KCET',
                 'exam_rank': 2000,
-                'exam_roll_number': 'JEE2024002',
-                'category': 'General'
+                'exam_roll_number': 'KCET2024002',
+                'category': 'General',
+                'domicile_state': 'Karnataka'
             },
             content_type='application/json'
         )
@@ -172,7 +176,7 @@ class TestAuthenticationAPI:
         response = client.post('/api/auth/login',
             json={
                 'identifier': 'student@test.com',
-                'password': 'password123'
+                'password': 'Password123'
             },
             content_type='application/json'
         )

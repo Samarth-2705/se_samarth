@@ -64,6 +64,8 @@ def setup_colleges(app):
                     name=f'Course {j+1}',
                     code=f'C{j+1}',
                     branch=f'Branch {j+1}',
+                    degree='B.E.',
+                    duration_years=4,
                     total_seats=100,
                     available_seats=100,
                     general_seats=50,
@@ -89,7 +91,7 @@ def setup_admin(app):
         admin = User(
             email='admin@test.com',
             mobile='9999999999',
-            password='admin123',
+            password='Admin123',
             role=UserRole.ADMIN
         )
         admin.email_verified = True
@@ -127,15 +129,16 @@ class TestCompleteStudentAdmissionFlow:
             json={
                 'email': 'student1@test.com',
                 'mobile': '8888888888',
-                'password': 'student123',
+                'password': 'Student123',
                 'first_name': 'Test',
                 'last_name': 'Student',
                 'date_of_birth': '2000-01-01',
                 'gender': 'Male',
-                'exam_type': 'JEE',
+                'exam_type': 'KCET',
                 'exam_rank': 1500,
-                'exam_roll_number': 'JEE2024100',
-                'category': 'General'
+                'exam_roll_number': 'KCET2024100',
+                'category': 'General',
+                'domicile_state': 'Karnataka'
             },
             content_type='application/json'
         )
@@ -260,7 +263,7 @@ class TestCompleteStudentAdmissionFlow:
         admin_login_response = client.post('/api/auth/login',
             json={
                 'identifier': 'admin@test.com',
-                'password': 'admin123'
+                'password': 'Admin123'
             },
             content_type='application/json'
         )
@@ -332,15 +335,16 @@ class TestMultipleStudentsAllotment:
                 json={
                     'email': f'student{i+1}@test.com',
                     'mobile': f'888888888{i}',
-                    'password': 'password123',
+                    'password': 'Password123',
                     'first_name': f'Student',
                     'last_name': f'{i+1}',
                     'date_of_birth': '2000-01-01',
                     'gender': 'Male',
-                    'exam_type': 'JEE',
+                    'exam_type': 'KCET',
                     'exam_rank': rank,
-                    'exam_roll_number': f'JEE2024{100+i}',
-                    'category': 'General'
+                    'exam_roll_number': f'KCET2024{100+i}',
+                    'category': 'General',
+                    'domicile_state': 'Karnataka'
                 },
                 content_type='application/json'
             )
@@ -395,7 +399,7 @@ class TestMultipleStudentsAllotment:
 
         # Admin triggers allotment
         admin_login = client.post('/api/auth/login',
-            json={'identifier': 'admin@test.com', 'password': 'admin123'},
+            json={'identifier': 'admin@test.com', 'password': 'Admin123'},
             content_type='application/json'
         )
         admin_token = json.loads(admin_login.data)['access_token']
@@ -435,15 +439,16 @@ class TestPaymentWorkflow:
             json={
                 'email': 'paytest@test.com',
                 'mobile': '7777777777',
-                'password': 'password123',
+                'password': 'Password123',
                 'first_name': 'Pay',
                 'last_name': 'Test',
                 'date_of_birth': '2000-01-01',
                 'gender': 'Male',
-                'exam_type': 'JEE',
+                'exam_type': 'KCET',
                 'exam_rank': 1000,
-                'exam_roll_number': 'JEE2024999',
-                'category': 'General'
+                'exam_roll_number': 'KCET2024999',
+                'category': 'General',
+                'domicile_state': 'Karnataka'
             },
             content_type='application/json'
         )
@@ -457,7 +462,7 @@ class TestPaymentWorkflow:
 
         # Login
         login_response = client.post('/api/auth/login',
-            json={'identifier': 'paytest@test.com', 'password': 'password123'},
+            json={'identifier': 'paytest@test.com', 'password': 'Password123'},
             content_type='application/json'
         )
         token = json.loads(login_response.data)['access_token']
