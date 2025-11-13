@@ -16,7 +16,7 @@ from .choice import Choice
 from .allotment import Allotment, AllotmentStatus, AllotmentRound
 from .payment import Payment, PaymentStatus, PaymentType
 from .notification import Notification, NotificationType
-from .otp import OTP
+from .otp import OTP, OTPPurpose
 from .audit_log import AuditLog
 
 __all__ = [
@@ -40,5 +40,6 @@ __all__ = [
     'Notification',
     'NotificationType',
     'OTP',
+    'OTPPurpose',
     'AuditLog'
 ]
