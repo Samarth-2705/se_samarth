@@ -115,6 +115,10 @@ class Allotment(db.Model):
         if include_course and self.course:
             data['course'] = self.course.to_dict(include_college=include_college)
 
+        # Include college data directly for frontend convenience
+        if include_college and self.course and self.course.college:
+            data['college'] = self.course.college.to_dict()
+
         if self.round:
             data['round'] = self.round.to_dict()
 
