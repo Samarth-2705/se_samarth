@@ -37,7 +37,7 @@ def verified_user(app):
         user = User(
             email='student@test.com',
             mobile='9876543210',
-            password='Password123',
+            password='Password@123',
             role=UserRole.STUDENT
         )
         user.email_verified = True
@@ -70,7 +70,7 @@ def admin_user(app):
         user = User(
             email='admin@test.com',
             mobile='9999999999',
-            password='Admin123',
+            password='Admin@123',
             role=UserRole.ADMIN
         )
         user.email_verified = True
@@ -87,7 +87,7 @@ def auth_token(client, verified_user):
     response = client.post('/api/auth/login',
         json={
             'identifier': 'student@test.com',
-            'password': 'Password123'
+            'password': 'Password@123'
         },
         content_type='application/json'
     )
@@ -101,7 +101,7 @@ def admin_token(client, admin_user):
     response = client.post('/api/auth/login',
         json={
             'identifier': 'admin@test.com',
-            'password': 'Admin123'
+            'password': 'Admin@123'
         },
         content_type='application/json'
     )
@@ -140,7 +140,16 @@ def sample_college_course(app):
         )
         db.session.add(course)
         db.session.commit()
-        return {'college': college, 'course': course}
+        college_id = college.id
+        course_id = course.id
+
+    # Return IDs to avoid DetachedInstanceError
+    class Ref:
+        def __init__(self, college_id, course_id):
+            self.college_id = college_id
+            self.course_id = course_id
+
+    return Ref(college_id, course_id)
 
 
 class TestAuthenticationAPI:
@@ -152,7 +161,7 @@ class TestAuthenticationAPI:
             json={
                 'email': 'newuser@test.com',
                 'mobile': '8888888888',
-                'password': 'Newpass123',
+                'password': 'Newpass@123',
                 'first_name': 'New',
                 'last_name': 'User',
                 'date_of_birth': '2000-01-01',
@@ -176,7 +185,7 @@ class TestAuthenticationAPI:
         response = client.post('/api/auth/login',
             json={
                 'identifier': 'student@test.com',
-                'password': 'Password123'
+                'password': 'Password@123'
             },
             content_type='application/json'
         )
@@ -223,15 +232,16 @@ class TestStudentAPI:
 
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert 'student' in data
-        assert data['student']['first_name'] == 'Test'
-        assert data['student']['exam_rank'] == 1500
+        # Profile returns student data directly, not wrapped in 'student' key
+        assert 'first_name' in data
+        assert data['first_name'] == 'Test'
+        assert data['exam_rank'] == 1500
 
     def test_update_student_profile(self, client, auth_token):
         """Test updating student profile"""
         response = client.put('/api/student/profile',
             json={
-                'address': '123 Test Street',
+                'address_line1': '123 Test Street',
                 'city': 'Bangalore',
                 'state': 'Karnataka',
                 'pincode': '560001'
@@ -242,7 +252,7 @@ class TestStudentAPI:
 
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert data['student']['address'] == '123 Test Street'
+        assert data['student']['address_line1'] == '123 Test Street'
 
     def test_get_student_dashboard(self, client, auth_token):
         """Test getting student dashboard"""
@@ -253,7 +263,8 @@ class TestStudentAPI:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert 'status' in data
-        assert 'profile' in data
+        assert 'student' in data
+        assert 'statistics' in data
 
 
 class TestChoiceFillingAPI:
@@ -272,7 +283,7 @@ class TestChoiceFillingAPI:
 
     def test_add_choice(self, client, auth_token, sample_college_course):
         """Test adding a choice"""
-        course_id = sample_college_course['course'].id
+        course_id = sample_college_course.course_id
 
         response = client.post('/api/choices/add',
             json={'course_id': course_id},
@@ -288,7 +299,7 @@ class TestChoiceFillingAPI:
     def test_list_choices(self, client, auth_token, sample_college_course):
         """Test listing choices"""
         # Add a choice first
-        course_id = sample_college_course['course'].id
+        course_id = sample_college_course.course_id
         client.post('/api/choices/add',
             json={'course_id': course_id},
             headers={'Authorization': f'Bearer {auth_token}'},
@@ -308,7 +319,7 @@ class TestChoiceFillingAPI:
     def test_submit_choices(self, client, auth_token, sample_college_course):
         """Test submitting choices"""
         # Add a choice first
-        course_id = sample_college_course['course'].id
+        course_id = sample_college_course.course_id
         client.post('/api/choices/add',
             json={'course_id': course_id},
             headers={'Authorization': f'Bearer {auth_token}'},
@@ -340,7 +351,8 @@ class TestPaymentAPI:
             content_type='application/json'
         )
 
-        assert response.status_code == 200
+        # POST endpoints for creating resources typically return 201
+        assert response.status_code == 201
         data = json.loads(response.data)
         assert 'order' in data
         assert data['order']['amount'] == 500
