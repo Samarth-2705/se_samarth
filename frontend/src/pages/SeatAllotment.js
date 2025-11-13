@@ -117,7 +117,7 @@ const SeatAllotment = () => {
                 </div>
                 <div className="info-item">
                   <span className="info-label">Category:</span>
-                  <span className="info-value">{allotment.category}</span>
+                  <span className="info-value">{allotment.allotted_category}</span>
                 </div>
                 <div className="info-item">
                   <span className="info-label">Allotted On:</span>
