@@ -91,7 +91,7 @@ def setup_admin(app):
         admin = User(
             email='admin@test.com',
             mobile='9999999999',
-            password='Admin123',
+            password='Admin@123',
             role=UserRole.ADMIN
         )
         admin.email_verified = True
@@ -129,7 +129,7 @@ class TestCompleteStudentAdmissionFlow:
             json={
                 'email': 'student1@test.com',
                 'mobile': '8888888888',
-                'password': 'Student123',
+                'password': 'Student@123',
                 'first_name': 'Test',
                 'last_name': 'Student',
                 'date_of_birth': '2000-01-01',
@@ -162,7 +162,7 @@ class TestCompleteStudentAdmissionFlow:
         login_response = client.post('/api/auth/login',
             json={
                 'identifier': 'student1@test.com',
-                'password': 'student123'
+                'password': 'Student@123'
             },
             content_type='application/json'
         )
@@ -207,7 +207,7 @@ class TestCompleteStudentAdmissionFlow:
             headers={'Authorization': f'Bearer {token}'},
             content_type='application/json'
         )
-        assert payment_order_response.status_code == 200
+        assert payment_order_response.status_code == 201
         order_data = json.loads(payment_order_response.data)
         print(f"✓ Payment order created: {order_data['order']['id']}")
 
@@ -263,7 +263,7 @@ class TestCompleteStudentAdmissionFlow:
         admin_login_response = client.post('/api/auth/login',
             json={
                 'identifier': 'admin@test.com',
-                'password': 'Admin123'
+                'password': 'Admin@123'
             },
             content_type='application/json'
         )
@@ -335,7 +335,7 @@ class TestMultipleStudentsAllotment:
                 json={
                     'email': f'student{i+1}@test.com',
                     'mobile': f'888888888{i}',
-                    'password': 'Password123',
+                    'password': 'Password@123',
                     'first_name': f'Student',
                     'last_name': f'{i+1}',
                     'date_of_birth': '2000-01-01',
@@ -369,7 +369,7 @@ class TestMultipleStudentsAllotment:
             login_response = client.post('/api/auth/login',
                 json={
                     'identifier': f'student{i+1}@test.com',
-                    'password': 'password123'
+                    'password': 'Password@123'
                 },
                 content_type='application/json'
             )
@@ -399,7 +399,7 @@ class TestMultipleStudentsAllotment:
 
         # Admin triggers allotment
         admin_login = client.post('/api/auth/login',
-            json={'identifier': 'admin@test.com', 'password': 'Admin123'},
+            json={'identifier': 'admin@test.com', 'password': 'Admin@123'},
             content_type='application/json'
         )
         admin_token = json.loads(admin_login.data)['access_token']
@@ -439,7 +439,7 @@ class TestPaymentWorkflow:
             json={
                 'email': 'paytest@test.com',
                 'mobile': '7777777777',
-                'password': 'Password123',
+                'password': 'Password@123',
                 'first_name': 'Pay',
                 'last_name': 'Test',
                 'date_of_birth': '2000-01-01',
@@ -462,7 +462,7 @@ class TestPaymentWorkflow:
 
         # Login
         login_response = client.post('/api/auth/login',
-            json={'identifier': 'paytest@test.com', 'password': 'Password123'},
+            json={'identifier': 'paytest@test.com', 'password': 'Password@123'},
             content_type='application/json'
         )
         token = json.loads(login_response.data)['access_token']
@@ -473,7 +473,7 @@ class TestPaymentWorkflow:
             headers={'Authorization': f'Bearer {token}'},
             content_type='application/json'
         )
-        assert order_response.status_code == 200
+        assert order_response.status_code == 201
         print("✓ Payment order created")
 
         # Verify payment
