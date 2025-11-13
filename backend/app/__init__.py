@@ -42,6 +42,10 @@ def create_app(config_name='development'):
     app.register_blueprint(choice.bp, url_prefix='/api/choices')
     app.register_blueprint(allotment.bp, url_prefix='/api/allotment')
 
+    # Create tables if they don't exist
+    with app.app_context():
+        db.create_all()
+
     # Register error handlers
     register_error_handlers(app)
 
