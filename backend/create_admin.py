@@ -3,7 +3,6 @@ Script to create an admin user
 """
 from app import create_app, db
 from app.models import User, UserRole
-from app.models import bcrypt
 
 def create_admin():
     """Create an admin user"""
@@ -21,14 +20,14 @@ def create_admin():
         admin = User(
             email='admin@admission.com',
             mobile='9999999999',
-            role=UserRole.ADMIN,
-            is_verified=True,
-            email_verified=True,
-            mobile_verified=True
+            password='admin123',
+            role=UserRole.ADMIN
         )
 
-        # Set password
-        admin.password_hash = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        # Set verification fields after creation
+        admin.is_verified = True
+        admin.email_verified = True
+        admin.mobile_verified = True
 
         db.session.add(admin)
         db.session.commit()
